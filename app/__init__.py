@@ -1,0 +1,2 @@
+"""Hit Component: Admin Dashboard."""
+

@@ -1,0 +1,37 @@
+# Hit Component: admin-dashboard
+# Provides an admin dashboard UI for managing users and viewing stats
+# Uses Server-Driven UI - returns UI specs that the SDK renders
+
+kind: component
+name: admin-dashboard
+
+services:
+  - name: api
+    kind: api
+    language: python
+    framework: fastapi
+    source_dir: app
+    port: 8200
+    dev: uv run uvicorn app.main:app --host 0.0.0.0 --port {port} --reload
+    start: uv run uvicorn app.main:app --host 0.0.0.0 --port {port} --workers 2
+    build: uv pip install --no-cache --system .
+    health: /health
+    documentation: /docs
+    k8s:
+      replicas: 1
+      resources:
+        requests:
+          cpu: 100m
+          memory: 128Mi
+        limits:
+          cpu: 500m
+          memory: 256Mi
+
+# Component always uses project database
+database:
+  schema: admin_dashboard  # Postgres schema for isolation
+
+dependencies:
+  modules:
+    - auth  # Requires auth module for user data
+
