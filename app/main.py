@@ -132,6 +132,20 @@ async def api_users() -> list[dict[str, Any]]:
             return []
 
 
+@app.post("/api/users")
+async def api_create_user(data: dict[str, Any]) -> dict[str, Any]:
+    """Create a new user via auth module."""
+    async with await get_auth_client() as client:
+        try:
+            response = await client.post("/users", json=data)
+            if response.status_code not in (200, 201):
+                error = response.json().get("detail", "Create failed")
+                raise HTTPException(status_code=response.status_code, detail=error)
+            return response.json()
+        except httpx.HTTPError as e:
+            raise HTTPException(status_code=502, detail=f"Auth service error: {e}")
+
+
 @app.get("/api/users/{email}")
 async def api_user(email: str) -> dict[str, Any]:
     """Get a single user from auth module."""
